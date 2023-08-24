@@ -1,74 +1,31 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useQuery, gql } from "@apollo/client";
 import "./App.css";
+// https://www.apollographql.com/docs/react/get-started
+const GET_LOCATIONS = gql`
+  query GetLocations {
+    locations {
+      id
+      name
+      description
+      photo
+    }
+  }
+`;
 
-import clone from "lodash.clone";
+export default function App() {
+  const { loading, error, data } = useQuery(GET_LOCATIONS);
 
-const checkVals: ReadonlyArray<{ colour: string; checked: boolean }> = [
-  {
-    colour: "red",
-    checked: false,
-  },
-  {
-    colour: "green",
-    checked: false,
-  },
-  {
-    colour: "blue",
-    checked: false,
-  },
-];
-function App() {
-  console.log("-".repeat(20), "checkVals", checkVals);
-  const [check, setCheck] = useState(() => {
-    console.log("-".repeat(20), "init checkVals once");
-    return checkVals.map((i) => clone(i));
-    // return checkVals.map((i) => i);
-  });
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error : {error.message}</p>;
 
-  const handleCheckboxChange = (colour: string) => {
-    console.log("-".repeat(20), "handleCheckboxChange", colour);
-    const newCheck = check.map((i) => {
-      if (i.colour === colour) {
-        i.checked = !i.checked;
-      }
-      return i;
-    });
-
-    console.log("-".repeat(20), "newCheck", newCheck);
-
-    setCheck(newCheck);
-
-    // getCheckboxResults && getCheckboxResults(checkedItems);
-  };
-
-  return (
-    <>
-      <div>
-        <h1>Check vals</h1>
-      </div>
-
-      {check &&
-        check.map((i) => {
-          return (
-            <div key={i.colour}>
-              <label>
-                {i.colour}
-                <input
-                  type="checkbox"
-                  value={i.checked ? "checked" : "unchecked"}
-                  onChange={() => {
-                    handleCheckboxChange(i.colour);
-                  }}
-                  checked={i.checked}
-                />
-              </label>
-            </div>
-          );
-        })}
-    </>
-  );
+  return data.locations.map(({ id, name, description, photo }) => (
+    <div key={id}>
+      <h3>{name}</h3>
+      <img width="400" height="250" alt="location-reference" src={`${photo}`} />
+      <br />
+      <b>About this location:</b>
+      <p>{description}</p>
+      <br />
+    </div>
+  ));
 }
-
-export default App;
